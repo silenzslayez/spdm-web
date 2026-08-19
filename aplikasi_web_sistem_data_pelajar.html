@@ -724,8 +724,6 @@
         function updateUserNavInfo() {
             document.getElementById('navUserName').innerText = currentUser.name;
             document.getElementById('navUserUsername').innerText = `@${currentUser.username}`;
-            document.getElementById('appHeaderSub').innerText = `${systemSettings.schoolName} (${systemSettings.academicYear})`;
-            document.getElementById('sysSchoolCodeBadge').innerText = systemSettings.schoolCode;
 
             const badge = document.getElementById('navRoleBadge');
             const isSuperadmin = currentUser.role === 'superadmin';
@@ -1047,6 +1045,9 @@
         }
 
         function loadSystemSettingsToUI() {
+            document.getElementById('appHeaderSub').innerText = `${systemSettings.schoolName} (${systemSettings.academicYear})`;
+            document.getElementById('sysSchoolCodeBadge').innerText = systemSettings.schoolCode;
+
             document.getElementById('sysSchoolName').value = systemSettings.schoolName;
             document.getElementById('sysSchoolCode').value = systemSettings.schoolCode;
             document.getElementById('sysAcademicYear').value = systemSettings.academicYear;
@@ -1473,6 +1474,7 @@
         }
 
         window.onload = function() {
+            loadSystemSettingsToUI();
             populateClassFilter();
         };
     </script>
