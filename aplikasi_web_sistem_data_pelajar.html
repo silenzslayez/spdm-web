@@ -648,19 +648,14 @@
         };
 
         const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/18bkoRc2bBIhJlkO4uJayrCLD_sOmoGzM83-aLupLnWM/export?format=csv&gid=185899133";
-        let googleAppsScriptUrl = localStorage.getItem("gas_app_url") || "";
+        let googleAppsScriptUrl = localStorage.getItem("gas_app_url") || "https://script.google.com/macros/s/AKfycbwY8UfPxxE_48x-21QE5CyMxZb_N9BtsuWrkyVNj-9nmSuQ-z0Swq8bl4pFuQ1gHG5e/exec";
 
         let users = JSON.parse(localStorage.getItem("sys_users")) || [
             { id: "usr-1", username: "superadmin", password: "ADMIN123321", name: "Pentadbir Utama (Superadmin)", role: "superadmin", assignedClass: "Semua" },
-            { id: "usr-2", username: "guru1amanah", password: "smardPTG123", name: "Cikgu Ahmad (Guru Kelas 1 Amanah)", role: "admin_kelas", assignedClass: "1 Amanah" },
-            { id: "usr-3", username: "guru", password: "smardPTG123", name: "Guru Biasa / Staf Sekolah", role: "user", assignedClass: "-" }
+            { id: "usr-2", username: "guru", password: "smardPTG123", name: "Guru Biasa / Staf Sekolah", role: "user", assignedClass: "-" }
         ];
 
-        let students = JSON.parse(localStorage.getItem("sys_students")) || [
-            { id: "PEL-001", icNumber: "120315-12-5543", name: "Ahmad Danish Bin Razak", className: "1 Amanah", gender: "Lelaki", parentName: "Razak Bin Ahmad", parentPhone: "0123456789", parentRelation: "Bapa", motherName: "Siti Rahmah Binti Ali", motherPhone: "0129876543", address: "No 12, Jalan Bunga Raya, Taman Melati, Kuala Lumpur", photoUrl: "https://images.unsplash.com/photo-1544717305-2782549b5136?w=300&auto=format&fit=crop&q=80", hostelStatus: "TIDAK" },
-            { id: "PEL-002", icNumber: "120520-10-6124", name: "Nur Nurul Aiman Binti Osman", className: "1 Amanah", gender: "Perempuan", parentName: "Osman Bin Hashim", parentPhone: "0198765432", parentRelation: "Bapa", motherName: "Aminah Binti Hassan", motherPhone: "0191122334", address: "No 45, Lorong Dahlia 3, Kampung Baru, Kuala Lumpur", photoUrl: "", hostelStatus: "YA" },
-            { id: "PEL-003", icNumber: "110811-14-5099", name: "Muhammad Harith Bin Zulkifli", className: "2 Bestari", gender: "Lelaki", parentName: "Zulkifli Bin Mansor", parentPhone: "0171122334", parentRelation: "Bapa", motherName: "Fatimah Binti Hussein", motherPhone: "", address: "B-05-12, Pangsapuri Seri Indah, Selangor", photoUrl: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=300&auto=format&fit=crop&q=80", hostelStatus: "TIDAK" }
-        ];
+        let students = JSON.parse(localStorage.getItem("sys_students")) || [];
 
         let currentUser = null;
         let currentViewMode = 'card';
@@ -771,6 +766,11 @@
             populateClassFilter();
             renderStudents();
             switchTab('directory');
+
+            // Auto-fetch data if students array is empty (first time load on device)
+            if (students.length === 0 && googleAppsScriptUrl) {
+                fetchGoogleSheetData();
+            }
         }
 
         function switchTab(tabId) {
