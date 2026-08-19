@@ -1056,6 +1056,15 @@
             }
         }
 
+        function extractImageUrl(input) {
+            if (!input) return "";
+            if (input.includes("<img") && input.includes("src=")) {
+                const match = input.match(/src=["'](.*?)["']/);
+                if (match && match[1]) return match[1];
+            }
+            return input;
+        }
+
         function saveSchoolSettings(e) {
             e.preventDefault();
             if (!currentUser || currentUser.role !== 'superadmin') return;
@@ -1064,8 +1073,8 @@
             systemSettings.schoolCode = document.getElementById('sysSchoolCode').value.trim() || 'XEE5318';
             systemSettings.academicYear = document.getElementById('sysAcademicYear').value.trim() || '2026';
             systemSettings.defaultTeacherPass = document.getElementById('sysDefaultPass').value.trim() || 'smardPTG123';
-            systemSettings.headerLogoUrl = document.getElementById('sysHeaderLogo').value.trim();
-            systemSettings.loginLogoUrl = document.getElementById('sysLoginLogo').value.trim();
+            systemSettings.headerLogoUrl = extractImageUrl(document.getElementById('sysHeaderLogo').value.trim());
+            systemSettings.loginLogoUrl = extractImageUrl(document.getElementById('sysLoginLogo').value.trim());
 
             localStorage.setItem("sys_schoolName", systemSettings.schoolName);
             localStorage.setItem("sys_schoolCode", systemSettings.schoolCode);
