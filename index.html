@@ -828,7 +828,7 @@
                 container.className = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4";
                 container.innerHTML = filtered.map(s => `
                     <div class="glass-card rounded-3xl overflow-hidden flex flex-col justify-between relative group">
-                        <div class="absolute inset-0 bg-gradient-to-br from-white/40 to-white/10 opacity-0 group-hover:opacity-100 transition duration-300"></div>
+                        <div class="absolute inset-0 bg-gradient-to-br from-white/40 to-white/10 opacity-0 group-hover:opacity-100 transition duration-300 pointer-events-none z-0"></div>
                         <div class="relative z-10">
                             <div class="bg-indigo-900/80 backdrop-blur-md text-white p-3 flex justify-between items-center text-xs border-b border-indigo-500/30">
                                 <span class="bg-white/20 text-indigo-50 px-2.5 py-0.5 rounded-full font-bold text-[10px] shadow-sm">${s.className}</span>
@@ -877,7 +877,7 @@
                             </div>
                         </div>
 
-                        <div class="p-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+                        <div class="relative z-10 p-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
                             <button onclick="viewStudentProfile('${s.id}')" class="text-xs font-bold text-indigo-600 hover:underline flex items-center gap-1">
                                 <i class="fa-solid fa-eye"></i> Profil Penuh
                             </button>
