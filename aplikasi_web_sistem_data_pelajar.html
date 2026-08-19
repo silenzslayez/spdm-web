@@ -599,7 +599,7 @@
                     </div>
                     <div id="assignedClassContainer">
                         <label class="font-bold text-slate-700 block mb-1">Padanan Kelas</label>
-                        <input type="text" id="editUserAssignedClass" placeholder="Contoh: 1 Amanah" class="w-full p-2 bg-slate-50 border rounded-xl font-semibold">
+                        <select id="editUserAssignedClass" class="w-full p-2 bg-slate-50 border rounded-xl font-semibold"></select>
                     </div>
                 </div>
 
@@ -787,14 +787,20 @@
             const classes = Array.from(new Set(students.map(s => s.className).filter(Boolean))).sort();
             const filter = document.getElementById('classFilter');
             const photoFilter = document.getElementById('photoClassFilter');
+            const userAssignFilter = document.getElementById('editUserAssignedClass');
 
             let optionsHtml = '<option value="Semua">Semua Kelas</option>';
+            let userOptionsHtml = '<option value="">-- Pilih Kelas --</option>';
+            
             classes.forEach(c => {
-                optionsHtml += `<option value="${c}">${c}</option>`;
+                const opt = `<option value="${c}">${c}</option>`;
+                optionsHtml += opt;
+                userOptionsHtml += opt;
             });
 
             filter.innerHTML = optionsHtml;
             if (photoFilter) photoFilter.innerHTML = optionsHtml;
+            if (userAssignFilter) userAssignFilter.innerHTML = userOptionsHtml;
         }
 
         function renderStudents() {
