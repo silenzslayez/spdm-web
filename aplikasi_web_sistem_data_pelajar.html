@@ -98,8 +98,8 @@
                 
                 <!-- Logo & Tajuk Portal -->
                 <div class="flex items-center space-x-3">
-                    <div class="bg-indigo-600 p-2.5 rounded-2xl shadow-md flex items-center justify-center text-yellow-300">
-                        <i class="fa-solid fa-graduation-cap text-2xl"></i>
+                    <div id="headerLogoContainer" class="bg-indigo-600 p-2.5 rounded-2xl shadow-md flex items-center justify-center text-yellow-300 w-11 h-11 overflow-hidden shrink-0">
+                        <i id="headerLogoIcon" class="fa-solid fa-graduation-cap text-2xl"></i>
                     </div>
                     <div>
                         <h1 id="appHeaderTitle" class="text-base sm:text-lg font-bold tracking-tight text-white flex items-center gap-2">
@@ -178,8 +178,8 @@
                 
                 <div class="relative z-10">
                     <div class="p-8 text-center border-b border-slate-200/50">
-                        <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 text-yellow-300 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl transform hover:scale-110 transition duration-300">
-                            <i class="fa-solid fa-user-shield text-2xl"></i>
+                        <div id="loginLogoContainer" class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 text-yellow-300 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl transform hover:scale-110 transition duration-300 overflow-hidden">
+                            <i id="loginLogoIcon" class="fa-solid fa-user-shield text-2xl"></i>
                         </div>
                         <h2 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-900 to-purple-900">Log Masuk Aplikasi</h2>
                         <p class="text-xs text-slate-500 mt-1 font-medium">Semak Pantas Data Murid (SPDM)</p>
@@ -205,37 +205,6 @@
                     <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold rounded-xl shadow-lg hover:shadow-indigo-500/30 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-sm">
                         <i class="fa-solid fa-right-to-bracket"></i> Log Masuk Ke Sistem
                     </button>
-
-                    <!-- Akses Pantas Ujian Demo -->
-                    <div class="pt-4 border-t border-slate-100 text-[11px] space-y-1.5">
-                        <p class="font-bold text-slate-400 text-center uppercase tracking-wider">Akses Pantas Log Masuk Ujian:</p>
-                        
-                        <div class="grid grid-cols-1 gap-1.5">
-                            <button type="button" onclick="quickLogin('superadmin', 'ADMIN123321')" class="p-2 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 rounded-xl font-semibold flex justify-between items-center text-left transition">
-                                <div>
-                                    <span class="block text-xs font-bold">👑 Superadmin</span>
-                                    <span class="text-[10px] text-amber-700 font-mono">superadmin / ADMIN123321</span>
-                                </div>
-                                <i class="fa-solid fa-chevron-right text-xs text-amber-600"></i>
-                            </button>
-
-                            <button type="button" onclick="quickLogin('guru1amanah', 'smardPTG123')" class="p-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-900 rounded-xl font-semibold flex justify-between items-center text-left transition">
-                                <div>
-                                    <span class="block text-xs font-bold">🏫 Guru Kelas (1 Amanah)</span>
-                                    <span class="text-[10px] text-emerald-700 font-mono">guru1amanah / smardPTG123</span>
-                                </div>
-                                <i class="fa-solid fa-chevron-right text-xs text-emerald-600"></i>
-                            </button>
-
-                            <button type="button" onclick="quickLogin('guru', 'smardPTG123')" class="p-2 bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-900 rounded-xl font-semibold flex justify-between items-center text-left transition">
-                                <div>
-                                    <span class="block text-xs font-bold">👁️ Guru / Staf Biasa (Akses Lihat)</span>
-                                    <span class="text-[10px] text-sky-700 font-mono">guru / smardPTG123</span>
-                                </div>
-                                <i class="fa-solid fa-chevron-right text-xs text-sky-600"></i>
-                            </button>
-                        </div>
-                    </div>
                 </form>
             </div>
         </section>
@@ -335,6 +304,14 @@
                     <div>
                         <label class="font-bold text-slate-700 block mb-1">Kata Laluan Default Guru Baru</label>
                         <input type="text" id="sysDefaultPass" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl font-mono">
+                    </div>
+                    <div>
+                        <label class="font-bold text-slate-700 block mb-1">URL Logo Header (Pilihan)</label>
+                        <input type="text" id="sysHeaderLogo" placeholder="Contoh: https://.../logo.png" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-[10px]">
+                    </div>
+                    <div>
+                        <label class="font-bold text-slate-700 block mb-1">URL Logo Login (Pilihan)</label>
+                        <input type="text" id="sysLoginLogo" placeholder="Contoh: https://.../logo2.png" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-[10px]">
                     </div>
                     <div class="sm:col-span-2 lg:col-span-4 flex justify-end">
                         <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-xs transition flex items-center gap-1.5">
@@ -656,7 +633,9 @@
             schoolName: localStorage.getItem("sys_schoolName") || "Semak Pantas Data Murid (SPDM)",
             schoolCode: localStorage.getItem("sys_schoolCode") || "XEE5318",
             academicYear: localStorage.getItem("sys_academicYear") || "2026",
-            defaultTeacherPass: localStorage.getItem("sys_defaultTeacherPass") || "smardPTG123"
+            defaultTeacherPass: localStorage.getItem("sys_defaultTeacherPass") || "smardPTG123",
+            headerLogoUrl: localStorage.getItem("sys_headerLogoUrl") || "",
+            loginLogoUrl: localStorage.getItem("sys_loginLogoUrl") || ""
         };
 
         const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/18bkoRc2bBIhJlkO4uJayrCLD_sOmoGzM83-aLupLnWM/export?format=csv&gid=185899133";
@@ -1052,6 +1031,28 @@
             document.getElementById('sysSchoolCode').value = systemSettings.schoolCode;
             document.getElementById('sysAcademicYear').value = systemSettings.academicYear;
             document.getElementById('sysDefaultPass').value = systemSettings.defaultTeacherPass;
+            document.getElementById('sysHeaderLogo').value = systemSettings.headerLogoUrl;
+            document.getElementById('sysLoginLogo').value = systemSettings.loginLogoUrl;
+            
+            // Render Header Logo
+            const headerContainer = document.getElementById('headerLogoContainer');
+            if (systemSettings.headerLogoUrl) {
+                headerContainer.innerHTML = `<img src="${systemSettings.headerLogoUrl}" class="w-full h-full object-cover">`;
+                headerContainer.classList.remove('p-2.5', 'text-yellow-300');
+            } else {
+                headerContainer.innerHTML = `<i id="headerLogoIcon" class="fa-solid fa-graduation-cap text-2xl"></i>`;
+                headerContainer.classList.add('p-2.5', 'text-yellow-300');
+            }
+
+            // Render Login Logo
+            const loginContainer = document.getElementById('loginLogoContainer');
+            if (systemSettings.loginLogoUrl) {
+                loginContainer.innerHTML = `<img src="${systemSettings.loginLogoUrl}" class="w-full h-full object-cover">`;
+                loginContainer.classList.remove('text-yellow-300');
+            } else {
+                loginContainer.innerHTML = `<i id="loginLogoIcon" class="fa-solid fa-user-shield text-2xl"></i>`;
+                loginContainer.classList.add('text-yellow-300');
+            }
         }
 
         function saveSchoolSettings(e) {
@@ -1062,11 +1063,15 @@
             systemSettings.schoolCode = document.getElementById('sysSchoolCode').value.trim() || 'XEE5318';
             systemSettings.academicYear = document.getElementById('sysAcademicYear').value.trim() || '2026';
             systemSettings.defaultTeacherPass = document.getElementById('sysDefaultPass').value.trim() || 'smardPTG123';
+            systemSettings.headerLogoUrl = document.getElementById('sysHeaderLogo').value.trim();
+            systemSettings.loginLogoUrl = document.getElementById('sysLoginLogo').value.trim();
 
-            localStorage.setItem('sys_schoolName', systemSettings.schoolName);
-            localStorage.setItem('sys_schoolCode', systemSettings.schoolCode);
-            localStorage.setItem('sys_academicYear', systemSettings.academicYear);
-            localStorage.setItem('sys_defaultTeacherPass', systemSettings.defaultTeacherPass);
+            localStorage.setItem("sys_schoolName", systemSettings.schoolName);
+            localStorage.setItem("sys_schoolCode", systemSettings.schoolCode);
+            localStorage.setItem("sys_academicYear", systemSettings.academicYear);
+            localStorage.setItem("sys_defaultTeacherPass", systemSettings.defaultTeacherPass);
+            localStorage.setItem("sys_headerLogoUrl", systemSettings.headerLogoUrl);
+            localStorage.setItem("sys_loginLogoUrl", systemSettings.loginLogoUrl);
 
             showToast("Tetapan portal sekolah berjaya disimpan!");
         }
