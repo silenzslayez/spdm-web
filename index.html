@@ -849,7 +849,7 @@
                                 <div class="flex items-start gap-1.5 text-slate-700">
                                     <i class="fa-solid fa-chalkboard-user text-indigo-600 shrink-0 mt-0.5"></i>
                                     <div class="truncate">
-                                        <span class="font-bold">Guru Kelas:</span> ${users.find(u => u.role === 'admin_kelas' && u.assignedClass === s.className)?.name || 'Belum Ditetapkan'}
+                                        <span class="font-bold">Guru Kelas:</span> ${s.teacherName || 'Belum Ditetapkan'}
                                     </div>
                                 </div>
 
@@ -942,26 +942,34 @@
 
         function viewStudentProfile(id) {
             const s = students.find(x => String(x.id) === String(id));
-            if (!s) return;
-
-            document.getElementById('modalStudentName').innerText = s.name;
-            document.getElementById('modalStudentClass').innerText = s.className;
-            document.getElementById('modalStudentIC').innerText = `No. IC: ${s.icNumber || 'Tidak Diisi'}`;
-            document.getElementById('modalStudentGender').innerText = s.gender || '-';
-            document.getElementById('modalStudentHostel').innerText = s.hostelStatus || '-';
-            document.getElementById('modalParentName').innerText = s.parentName || '-';
-            document.getElementById('modalParentRel').innerText = s.parentRelation || 'Waris';
-            document.getElementById('modalParentPhone').innerText = s.parentPhone || '-';
-            document.getElementById('modalStudentAddress').innerText = s.address || 'Tiada rekod alamat.';
-
-            const photoContainer = document.getElementById('modalPhotoContainer');
-            if (s.photoUrl) {
-                photoContainer.innerHTML = `<img src="${s.photoUrl}" class="w-full h-full object-cover">`;
-            } else {
-                photoContainer.innerHTML = `<i class="fa-solid fa-user text-slate-300 text-2xl"></i>`;
+            if (!s) {
+                alert("Ralat: Rekod pelajar tidak dijumpai (ID: " + id + ")");
+                return;
             }
 
-            openModal('studentProfileModal');
+            try {
+                document.getElementById('modalStudentName').innerText = s.name;
+                document.getElementById('modalStudentClass').innerText = s.className;
+                document.getElementById('modalStudentIC').innerText = `No. IC: ${s.icNumber || 'Tidak Diisi'}`;
+                document.getElementById('modalStudentGender').innerText = s.gender || '-';
+                document.getElementById('modalStudentHostel').innerText = s.hostelStatus || '-';
+                document.getElementById('modalParentName').innerText = s.parentName || '-';
+                document.getElementById('modalParentRel').innerText = s.parentRelation || 'Waris';
+                document.getElementById('modalParentPhone').innerText = s.parentPhone || '-';
+                document.getElementById('modalStudentAddress').innerText = s.address || 'Tiada rekod alamat.';
+
+                const photoContainer = document.getElementById('modalPhotoContainer');
+                if (s.photoUrl) {
+                    photoContainer.innerHTML = `<img src="${s.photoUrl}" class="w-full h-full object-cover">`;
+                } else {
+                    photoContainer.innerHTML = `<i class="fa-solid fa-user text-slate-300 text-2xl"></i>`;
+                }
+
+                openModal('studentProfileModal');
+            } catch (err) {
+                alert("Ralat semasa membuka profil: " + err.message);
+                console.error(err);
+            }
         }
 
         function openAddStudentModal() {
@@ -1397,7 +1405,8 @@
                         parentRelation: 'Bapa',
                         address: row['ALAMAT KEDIAMAN'] || row['ALAMAT'] || '',
                         photoUrl: row['GAMBAR'] || '',
-                        hostelStatus: row['STATUS ASRAMA'] || 'TIDAK'
+                        hostelStatus: row['STATUS ASRAMA'] || 'TIDAK',
+                        teacherName: row['NAMA GURU KELAS'] || row['GURU KELAS'] || ''
                     }));
 
                     localStorage.setItem("sys_students", JSON.stringify(students));

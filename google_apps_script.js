@@ -28,6 +28,7 @@ function doGet(e) {
     const address2Idx = headers.findIndex(h => h === "ALAMAT 2");
     const address3Idx = headers.findIndex(h => h === "ALAMAT 3");
     let hostelIdx = headers.findIndex(h => h === "STATUS ASRAMA");
+    let teacherIdx = headers.findIndex(h => h === "NAMA GURU KELAS" || h === "GURU KELAS");
     let photoIdx = headers.findIndex(h => h === "GAMBAR");
     
     // Jika lajur GAMBAR tiada, cipta lajur baru di hujung
@@ -61,7 +62,8 @@ function doGet(e) {
         motherPhone: p2PhoneIdx > -1 ? String(row[p2PhoneIdx]) : "",
         address: address,
         photoUrl: photoIdx > -1 ? String(row[photoIdx]) : "",
-        hostelStatus: hostelIdx > -1 ? String(row[hostelIdx]) : "TIDAK"
+        hostelStatus: hostelIdx > -1 ? String(row[hostelIdx]) : "TIDAK",
+        teacherName: teacherIdx > -1 ? String(row[teacherIdx]) : ""
       });
     }
     
