@@ -97,43 +97,47 @@
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                 
                 <!-- Logo & Tajuk Portal -->
-                <div class="flex items-center space-x-3">
-                    <div id="headerLogoContainer" class="bg-indigo-600 p-2.5 rounded-2xl shadow-md flex items-center justify-center text-yellow-300 w-11 h-11 overflow-hidden shrink-0">
-                        <i id="headerLogoIcon" class="fa-solid fa-graduation-cap text-2xl"></i>
+                <div class="flex items-center space-x-3 w-full md:w-auto overflow-hidden">
+                    <div id="headerLogoContainer" class="bg-indigo-600 p-2.5 rounded-2xl shadow-md flex items-center justify-center text-yellow-300 w-11 h-11 sm:w-12 sm:h-12 overflow-hidden shrink-0">
+                        <i id="headerLogoIcon" class="fa-solid fa-graduation-cap text-xl sm:text-2xl"></i>
                     </div>
-                    <div>
-                        <h1 id="appHeaderTitle" class="text-base sm:text-lg font-bold tracking-tight text-white flex items-center gap-2">
+                    <div class="min-w-0 flex-1">
+                        <h1 id="appHeaderTitle" class="text-sm sm:text-lg font-bold tracking-tight text-white flex flex-wrap items-center gap-1.5 leading-tight">
                             Semak Pantas Data Murid (SPDM)
-                            <span id="sysSchoolCodeBadge" class="text-[10px] bg-indigo-800 text-indigo-200 px-2 py-0.5 rounded-full font-mono uppercase">XEE5318</span>
+                            <span id="sysSchoolCodeBadge" class="text-[10px] bg-indigo-800 text-indigo-200 px-2 py-0.5 rounded-full font-mono uppercase shrink-0">XEE5318</span>
                         </h1>
-                        <p id="appHeaderSub" class="text-xs text-indigo-300">Semak Pantas Data Murid</p>
+                        <p id="appHeaderSub" class="text-[10px] sm:text-xs text-indigo-300 truncate mt-0.5">Semak Pantas Data Murid</p>
                     </div>
                 </div>
 
                 <!-- Control Bar & Profil User -->
-                <div id="navUserArea" class="hidden flex-wrap items-center gap-2 bg-indigo-900/80 p-2 rounded-2xl border border-indigo-700/50">
-                    <button onclick="fetchGoogleSheetData()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-xs" title="Kemas kini data terus dari Google Sheets">
-                        <i class="fa-solid fa-rotate text-xs"></i> Tarik Data Sheet
-                    </button>
+                <div id="navUserArea" class="hidden w-full md:w-auto flex-col sm:flex-row items-stretch sm:items-center gap-3 bg-indigo-900/80 p-3 sm:p-2 rounded-2xl border border-indigo-700/50">
+                    <div class="flex items-center justify-between gap-2 w-full sm:w-auto">
+                        <button onclick="fetchGoogleSheetData()" class="flex-1 sm:flex-none px-3 py-2 sm:py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition shadow-xs" title="Kemas kini data terus dari Google Sheets">
+                            <i class="fa-solid fa-rotate text-xs"></i> Tarik Data
+                        </button>
 
-                    <button id="pushDataBtn" onclick="pushToGoogleSheet()" class="hidden px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-bold items-center gap-1.5 transition shadow-xs" title="Hantar data aplikasi ke Google Sheets">
-                        <i class="fa-solid fa-cloud-arrow-up text-xs"></i> Hantar Ke Sheet
-                    </button>
-
-                    <div class="text-right pl-2 border-l border-indigo-800">
-                        <p id="navUserName" class="text-xs font-bold text-white flex items-center gap-1 justify-end">Nama Guru</p>
-                        <p id="navUserUsername" class="text-[10px] text-indigo-300 font-mono">@username</p>
+                        <button id="pushDataBtn" class="hidden flex-1 sm:flex-none px-3 py-2 sm:py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-bold items-center justify-center gap-1.5 transition shadow-xs" title="Hantar data aplikasi ke Google Sheets">
+                            <i class="fa-solid fa-cloud-arrow-up text-xs"></i> Hantar Data
+                        </button>
                     </div>
 
-                    <span id="navRoleBadge" class="text-[10px] px-2 py-1 rounded-lg font-bold bg-amber-500 text-indigo-950">Superadmin</span>
-
-                    <button id="btnChangePass" onclick="openChangePassModal()" class="hidden p-1.5 bg-indigo-800 hover:bg-indigo-700 text-indigo-200 hover:text-white rounded-xl transition" title="Tukar Kata Laluan">
-                        <i class="fa-solid fa-key text-xs"></i>
-                    </button>
-
-                    <button onclick="logout()" class="p-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl transition" title="Log Keluar">
-                        <i class="fa-solid fa-right-from-bracket text-xs"></i>
-                    </button>
+                    <div class="flex items-center justify-between sm:justify-end gap-2 sm:gap-3 border-t sm:border-t-0 sm:border-l border-indigo-700/50 pt-3 sm:pt-0 sm:pl-3 w-full sm:w-auto">
+                        <div class="text-left sm:text-right flex-1 sm:flex-none min-w-0">
+                            <p id="navUserName" class="text-[11px] sm:text-xs font-bold text-white truncate">Nama Guru</p>
+                            <p id="navUserUsername" class="text-[9px] sm:text-[10px] text-indigo-300 font-mono truncate">@username</p>
+                        </div>
+                        <span id="navRoleBadge" class="text-[9px] sm:text-[10px] px-2 py-1 rounded-lg font-bold bg-amber-500 text-indigo-950 shrink-0">Superadmin</span>
+                        
+                        <div class="flex items-center gap-1 shrink-0">
+                            <button id="btnChangePass" onclick="openChangePassModal()" class="hidden p-2 bg-indigo-800 hover:bg-indigo-700 text-indigo-200 hover:text-white rounded-xl transition" title="Tukar Kata Laluan">
+                                <i class="fa-solid fa-key text-xs"></i>
+                            </button>
+                            <button onclick="logout()" class="p-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl transition" title="Log Keluar">
+                                <i class="fa-solid fa-right-from-bracket text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
             </div>
