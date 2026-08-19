@@ -92,7 +92,7 @@
 </head>
 <body class="font-sans antialiased text-slate-800 animated-bg h-full flex flex-col selection:bg-indigo-500 selection:text-white">
 
-    <header class="glass-header text-white sticky top-0 z-30">
+    <header class="glass-header text-white md:sticky md:top-0 z-30 relative">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 text-white">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                 
@@ -144,7 +144,7 @@
         </div>
     </header>
 
-    <div id="mainNavTabs" class="hidden glass-panel sticky top-[72px] z-20">
+    <div id="mainNavTabs" class="hidden glass-panel md:sticky md:top-[72px] z-20 relative">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <nav class="flex space-x-2 overflow-x-auto py-3 hide-scrollbar">
                 
@@ -218,7 +218,7 @@
         </section>
 
         <section id="content-directory" class="tab-content hidden space-y-4">
-            <div class="glass-card p-4 rounded-3xl flex flex-col md:flex-row gap-3 justify-between items-center mb-2">
+            <div class="glass-card p-4 rounded-3xl flex flex-col md:flex-row gap-3 justify-between items-center mb-2 sticky top-2 z-40 shadow-lg border border-indigo-200/50 backdrop-blur-md bg-white/70">
                 <div class="relative flex-1 w-full">
                     <i class="fa-solid fa-magnifying-glass text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 text-xs"></i>
                     <input type="text" id="searchInput" oninput="renderStudents()" placeholder="Cari nama pelajar, waris, no. tel, alamat..." class="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none">
@@ -643,8 +643,8 @@
             schoolCode: localStorage.getItem("sys_schoolCode") || "XEE5318",
             academicYear: localStorage.getItem("sys_academicYear") || "2026",
             defaultTeacherPass: localStorage.getItem("sys_defaultTeacherPass") || "smardPTG123",
-            headerLogoUrl: localStorage.getItem("sys_headerLogoUrl") || "",
-            loginLogoUrl: localStorage.getItem("sys_loginLogoUrl") || ""
+            headerLogoUrl: localStorage.getItem("sys_headerLogoUrl") || "https://iili.io/CLL4PCg.png",
+            loginLogoUrl: localStorage.getItem("sys_loginLogoUrl") || "https://iili.io/CLL4PCg.png"
         };
 
         const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/18bkoRc2bBIhJlkO4uJayrCLD_sOmoGzM83-aLupLnWM/export?format=csv&gid=185899133";
