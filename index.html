@@ -448,6 +448,7 @@
                             <span id="modalStudentClass" class="bg-indigo-100 text-indigo-800 text-[10px] font-bold px-2 py-0.5 rounded-full"></span>
                             <h3 id="modalStudentName" class="font-bold text-slate-900 text-base leading-tight mt-1"></h3>
                             <p id="modalStudentIC" class="text-xs text-slate-500 font-mono mt-0.5"></p>
+                            <p class="text-[11px] text-slate-600 mt-1"><i class="fa-solid fa-chalkboard-user text-indigo-500 mr-1"></i>Guru Kelas: <span id="modalTeacherName" class="font-bold text-slate-800"></span></p>
                         </div>
                     </div>
                     <button onclick="closeModal('studentProfileModal')" class="text-slate-400 hover:text-slate-600 p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -951,6 +952,7 @@
                 document.getElementById('modalStudentName').innerText = s.name;
                 document.getElementById('modalStudentClass').innerText = s.className;
                 document.getElementById('modalStudentIC').innerText = `No. IC: ${s.icNumber || 'Tidak Diisi'}`;
+                document.getElementById('modalTeacherName').innerText = s.teacherName || 'Belum Ditetapkan';
                 document.getElementById('modalStudentGender').innerText = s.gender || '-';
                 document.getElementById('modalStudentHostel').innerText = s.hostelStatus || '-';
                 document.getElementById('modalParentName').innerText = s.parentName || '-';
