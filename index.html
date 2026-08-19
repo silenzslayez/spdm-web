@@ -127,7 +127,7 @@
 
                     <span id="navRoleBadge" class="text-[10px] px-2 py-1 rounded-lg font-bold bg-amber-500 text-indigo-950">Superadmin</span>
 
-                    <button onclick="openChangePassModal()" class="p-1.5 bg-indigo-800 hover:bg-indigo-700 text-indigo-200 hover:text-white rounded-xl transition" title="Tukar Kata Laluan">
+                    <button id="btnChangePass" onclick="openChangePassModal()" class="hidden p-1.5 bg-indigo-800 hover:bg-indigo-700 text-indigo-200 hover:text-white rounded-xl transition" title="Tukar Kata Laluan">
                         <i class="fa-solid fa-key text-xs"></i>
                     </button>
 
@@ -745,6 +745,12 @@
                 document.getElementById('pushDataBtn').classList.add('hidden');
             }
 
+            const btnChangePass = document.getElementById('btnChangePass');
+            if (btnChangePass) {
+                if (isSuperadmin) btnChangePass.classList.remove('hidden');
+                else btnChangePass.classList.add('hidden');
+            }
+
             document.getElementById('tab-upload').style.display = isSuperadmin ? 'inline-flex' : 'none';
             document.getElementById('tab-users').style.display = isSuperadmin ? 'inline-flex' : 'none';
             document.getElementById('tab-setup').style.display = isSuperadmin ? 'inline-flex' : 'none';
@@ -1037,7 +1043,7 @@
                     await fetch(googleAppsScriptUrl, {
                         method: 'POST',
                         mode: 'no-cors',
-                        body: JSON.stringify({ action: 'updateStudent', student: studentObj })
+                        body: JSON.stringify({ action: 'pushData', students: [studentObj] })
                     });
                     showToast("Rekod pelajar berjaya disimpan & disegerak!");
                 } catch (err) {
@@ -1308,7 +1314,7 @@
                 await fetch(googleAppsScriptUrl, {
                     method: 'POST',
                     mode: 'no-cors',
-                    body: JSON.stringify({ action: 'syncAllData', students, users })
+                    body: JSON.stringify({ action: 'pushData', students: students })
                 });
                 showToast("Data dihantar ke Google Sheets!");
             } catch (err) {

@@ -1,41 +1,69 @@
-const FOLDER_ID_DRIVE = "1cRFISaADgQrLsi6mBEAWtVcQcetmg2Ge";
-
 function doGet(e) {
-  const action = e.parameter.action;
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  return handleRequest(e);
+}
+
+function doPost(e) {
+  return handleRequest(e);
+}
+
+function handleRequest(e) {
+  // CORS Headers
+  const headers = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+  };
   
-  if (action === "getStudents") {
-    let sheet = ss.getSheetByName("Pelajar");
-    if (!sheet) sheet = ss.getSheets()[0]; // Fallback ke sheet pertama
-    
+  if (e.postData && e.postData.type === "application/json") {
+    try {
+      const payload = JSON.parse(e.postData.contents);
+      
+      // Handle Photo Upload
+      if (payload.action === 'uploadPhoto') {
+        return handleUploadPhoto(payload);
+      }
+      
+      // Handle Data Push from App -> Google Sheets
+      if (payload.action === 'pushData') {
+        return handlePushData(payload);
+      }
+      
+    } catch (err) {
+      return responseJSON({ success: false, message: err.toString() });
+    }
+  }
+
+  // GET Request: Fetch all data
+  try {
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
     const data = sheet.getDataRange().getValues();
-    if (data.length <= 1) return responseJSON([]);
+    if (data.length < 2) return responseJSON([]);
     
-    const headers = data[0].map(h => h.toString().trim().toUpperCase());
+    const sheetHeaders = data[0].map(h => String(h).toUpperCase().trim());
     
     // Cari index lajur berdasarkan format APDM asal atau format ringkas
-    const idIdx = headers.findIndex(h => h === "ID MURID" || h === "ID");
-    const nameIdx = headers.findIndex(h => h === "NAMA" || h === "NAMA MURID");
-    const icIdx = headers.findIndex(h => h === "NO. PENGENALAN" || h === "NO KAD PENGENALAN");
-    const classIdx = headers.findIndex(h => h === "NAMA KELAS" || h === "KELAS");
-    const genderIdx = headers.findIndex(h => h === "JANTINA");
-    const p1NameIdx = headers.findIndex(h => h === "PENJAGA 1" || h === "NAMA BAPA / PENJAGA 1" || h === "NAMA WARIS");
-    const p1RelIdx = headers.findIndex(h => h === "HUBUNGAN PENJAGA 1" || h === "HUBUNGAN");
-    const p1PhoneIdx = headers.findIndex(h => h === "NO. TEL. BIMBIT PENJAGA 1" || h === "NO TEL BAPA / PENJAGA 1" || h === "NO TEL WARIS");
-    const p2NameIdx = headers.findIndex(h => h === "PENJAGA 2" || h === "NAMA IBU / PENJAGA 2");
-    const p2PhoneIdx = headers.findIndex(h => h === "NO. TEL. BIMBIT PENJAGA 2" || h === "NO TEL IBU / PENJAGA 2");
-    const address1Idx = headers.findIndex(h => h === "ALAMAT 1" || h === "ALAMAT KEDIAMAN" || h === "ALAMAT");
-    const address2Idx = headers.findIndex(h => h === "ALAMAT 2");
-    const address3Idx = headers.findIndex(h => h === "ALAMAT 3");
-    let hostelIdx = headers.findIndex(h => h === "STATUS ASRAMA");
-    let teacherIdx = headers.findIndex(h => h === "NAMA GURU KELAS" || h === "GURU KELAS");
-    let photoIdx = headers.findIndex(h => h === "GAMBAR");
+    const idIdx = sheetHeaders.findIndex(h => h === "ID MURID" || h === "ID");
+    const nameIdx = sheetHeaders.findIndex(h => h === "NAMA" || h === "NAMA MURID");
+    const icIdx = sheetHeaders.findIndex(h => h === "NO. PENGENALAN" || h === "NO KAD PENGENALAN");
+    const classIdx = sheetHeaders.findIndex(h => h === "NAMA KELAS" || h === "KELAS");
+    const genderIdx = sheetHeaders.findIndex(h => h === "JANTINA");
+    const p1NameIdx = sheetHeaders.findIndex(h => h === "PENJAGA 1" || h === "NAMA BAPA / PENJAGA 1" || h === "NAMA WARIS");
+    const p1RelIdx = sheetHeaders.findIndex(h => h === "HUBUNGAN PENJAGA 1" || h === "HUBUNGAN");
+    const p1PhoneIdx = sheetHeaders.findIndex(h => h === "NO. TEL. BIMBIT PENJAGA 1" || h === "NO TEL BAPA / PENJAGA 1" || h === "NO TEL WARIS");
+    const p2NameIdx = sheetHeaders.findIndex(h => h === "PENJAGA 2" || h === "NAMA IBU / PENJAGA 2");
+    const p2PhoneIdx = sheetHeaders.findIndex(h => h === "NO. TEL. BIMBIT PENJAGA 2" || h === "NO TEL IBU / PENJAGA 2");
+    const address1Idx = sheetHeaders.findIndex(h => h === "ALAMAT 1" || h === "ALAMAT KEDIAMAN" || h === "ALAMAT");
+    const address2Idx = sheetHeaders.findIndex(h => h === "ALAMAT 2");
+    const address3Idx = sheetHeaders.findIndex(h => h === "ALAMAT 3");
+    let hostelIdx = sheetHeaders.findIndex(h => h === "STATUS ASRAMA");
+    let teacherIdx = sheetHeaders.findIndex(h => h === "NAMA GURU KELAS" || h === "GURU KELAS");
+    let photoIdx = sheetHeaders.findIndex(h => h === "GAMBAR");
     
     // Jika lajur GAMBAR tiada, cipta lajur baru di hujung
     if (photoIdx === -1) {
-      photoIdx = headers.length;
+      photoIdx = sheetHeaders.length;
       sheet.getRange(1, photoIdx + 1).setValue("GAMBAR");
-      headers.push("GAMBAR");
+      sheetHeaders.push("GAMBAR");
     }
     
     const students = [];
@@ -68,97 +96,123 @@ function doGet(e) {
     }
     
     return responseJSON(students);
-  }
-  
-  return responseJSON({ status: "API Google Apps Script SIS Aktif (Mode Selamat)" });
-}
-
-function doPost(e) {
-  try {
-    const contents = JSON.parse(e.postData.contents);
-    const action = contents.action;
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    let sheet = ss.getSheetByName("Pelajar");
-    if (!sheet) sheet = ss.getSheets()[0];
-    
-    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(h => h.toString().trim().toUpperCase());
-    const idIdx = headers.findIndex(h => h === "ID MURID" || h === "ID");
-    
-    if (action === "uploadPhoto") {
-      const folder = DriveApp.getFolderById(FOLDER_ID_DRIVE);
-      const studentId = contents.studentId;
-      const base64Data = contents.base64Image.split(",")[1];
-      const blob = Utilities.newBlob(Utilities.base64Decode(base64Data), "image/jpeg", studentId + ".jpg");
-      
-      const file = folder.createFile(blob);
-      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-      const photoUrl = "https://lh3.googleusercontent.com/d/" + file.getId();
-
-      let photoIdx = headers.findIndex(h => h === "GAMBAR");
-      if (photoIdx === -1) {
-        photoIdx = headers.length;
-        sheet.getRange(1, photoIdx + 1).setValue("GAMBAR");
-      }
-
-      if (idIdx > -1) {
-        const data = sheet.getDataRange().getValues();
-        for (let i = 1; i < data.length; i++) {
-          if (String(data[i][idIdx]) === String(studentId)) {
-            sheet.getRange(i + 1, photoIdx + 1).setValue(photoUrl);
-            break;
-          }
-        }
-      }
-      return responseJSON({ success: true, photoUrl: photoUrl });
-    }
-    
-    if (action === "syncAllData") {
-       sheet.clear();
-       sheet.appendRow(["ID MURID", "NO. PENGENALAN", "NAMA", "NAMA KELAS", "JANTINA", "PENJAGA 1", "NO. TEL. BIMBIT PENJAGA 1", "HUBUNGAN PENJAGA 1", "ALAMAT 1", "STATUS ASRAMA", "GAMBAR"]);
-       
-       contents.students.forEach(st => {
-         sheet.appendRow([
-           st.id, st.icNumber, st.name, st.className, st.gender, 
-           st.parentName, st.parentPhone, st.parentRelation, 
-           st.address, st.hostelStatus, st.photoUrl
-         ]);
-       });
-       return responseJSON({ success: true, message: "Data berjaya dihantar ke Sheet secara pukal" });
-    }
-    
-    if (action === "updateStudent") {
-       const st = contents.student;
-       if (!st || !st.id || idIdx === -1) return responseJSON({ error: "Data tidak sah atau ID tidak dijumpai" });
-       
-       const data = sheet.getDataRange().getValues();
-       for (let i = 1; i < data.length; i++) {
-          if (String(data[i][idIdx]) === String(st.id)) {
-            const nameIdx = headers.findIndex(h => h === "NAMA" || h === "NAMA MURID");
-            const classIdx = headers.findIndex(h => h === "NAMA KELAS" || h === "KELAS");
-            const p1NameIdx = headers.findIndex(h => h === "PENJAGA 1" || h === "NAMA BAPA / PENJAGA 1" || h === "NAMA WARIS");
-            const p1PhoneIdx = headers.findIndex(h => h === "NO. TEL. BIMBIT PENJAGA 1" || h === "NO TEL BAPA / PENJAGA 1" || h === "NO TEL WARIS");
-            const icIdx = headers.findIndex(h => h === "NO. PENGENALAN" || h === "NO KAD PENGENALAN");
-            const address1Idx = headers.findIndex(h => h === "ALAMAT 1" || h === "ALAMAT KEDIAMAN" || h === "ALAMAT");
-            
-            if (nameIdx > -1) sheet.getRange(i + 1, nameIdx + 1).setValue(st.name);
-            if (classIdx > -1) sheet.getRange(i + 1, classIdx + 1).setValue(st.className);
-            if (p1NameIdx > -1) sheet.getRange(i + 1, p1NameIdx + 1).setValue(st.parentName);
-            if (p1PhoneIdx > -1) sheet.getRange(i + 1, p1PhoneIdx + 1).setValue(st.parentPhone);
-            if (icIdx > -1) sheet.getRange(i + 1, icIdx + 1).setValue(st.icNumber);
-            if (address1Idx > -1) sheet.getRange(i + 1, address1Idx + 1).setValue(st.address);
-            
-            return responseJSON({ success: true, message: "Pelajar dikemaskini" });
-          }
-       }
-       return responseJSON({ error: "Pelajar tidak ditemui di Sheet" });
-    }
-
-    return responseJSON({ error: "Invalid action" });
   } catch (err) {
     return responseJSON({ error: err.toString() });
   }
 }
 
+function handleUploadPhoto(payload) {
+  const studentId = payload.studentId;
+  const base64Image = payload.base64Image;
+  
+  try {
+    // Find or create SPDM Photos folder
+    let folder;
+    const folders = DriveApp.getFoldersByName("Gambar Murid SPDM");
+    if (folders.hasNext()) {
+        folder = folders.next();
+    } else {
+        folder = DriveApp.createFolder("Gambar Murid SPDM");
+        folder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    }
+    
+    // Convert base64 to blob
+    const contentType = base64Image.split(';')[0].split(':')[1];
+    const base64Data = base64Image.split(',')[1];
+    const blob = Utilities.newBlob(Utilities.base64Decode(base64Data), contentType, studentId + ".jpg");
+    
+    // Check if file already exists (overwrite by trashing old one)
+    const existingFiles = folder.getFilesByName(studentId + ".jpg");
+    if (existingFiles.hasNext()) {
+        existingFiles.next().setTrashed(true);
+    }
+    
+    const file = folder.createFile(blob);
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    const fileUrl = "https://drive.google.com/uc?export=view&id=" + file.getId();
+    
+    // Update the sheet's GAMBAR column
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    const data = sheet.getDataRange().getValues();
+    const sheetHeaders = data[0].map(h => String(h).toUpperCase().trim());
+    const idIdx = sheetHeaders.findIndex(h => h === "ID MURID" || h === "ID");
+    let photoIdx = sheetHeaders.findIndex(h => h === "GAMBAR");
+    
+    if (photoIdx === -1) {
+        photoIdx = sheetHeaders.length;
+        sheet.getRange(1, photoIdx + 1).setValue("GAMBAR");
+    }
+    
+    if (idIdx > -1) {
+        const rowIndex = data.findIndex(row => String(row[idIdx]) === String(studentId));
+        if (rowIndex > 0) {
+            sheet.getRange(rowIndex + 1, photoIdx + 1).setValue(fileUrl);
+        }
+    }
+    
+    return responseJSON({ success: true, message: "Gambar berjaya disimpan", url: fileUrl });
+  } catch (err) {
+    return responseJSON({ success: false, message: err.toString() });
+  }
+}
+
+function handlePushData(payload) {
+  try {
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    const data = sheet.getDataRange().getValues();
+    const sheetHeaders = data[0].map(h => String(h).toUpperCase().trim());
+    const idIdx = sheetHeaders.findIndex(h => h === "ID MURID" || h === "ID");
+    
+    if (idIdx === -1) return responseJSON({ success: false, message: "Lajur ID MURID tiada." });
+
+    let updated = 0;
+    const studentsToUpdate = payload.students || [];
+
+    for (const student of studentsToUpdate) {
+      const rowIndex = data.findIndex(row => String(row[idIdx]) === String(student.id));
+      if (rowIndex > 0) {
+        // Update maklumat asas
+        const p1PhoneIdx = sheetHeaders.findIndex(h => h === "NO. TEL. BIMBIT PENJAGA 1" || h === "NO TEL BAPA / PENJAGA 1" || h === "NO TEL WARIS");
+        const address1Idx = sheetHeaders.findIndex(h => h === "ALAMAT 1" || h === "ALAMAT KEDIAMAN" || h === "ALAMAT");
+        const icIdx = sheetHeaders.findIndex(h => h === "NO. PENGENALAN" || h === "NO KAD PENGENALAN");
+        const p1NameIdx = sheetHeaders.findIndex(h => h === "PENJAGA 1" || h === "NAMA BAPA / PENJAGA 1" || h === "NAMA WARIS");
+        
+        if (p1PhoneIdx > -1) sheet.getRange(rowIndex + 1, p1PhoneIdx + 1).setValue(student.parentPhone);
+        if (address1Idx > -1) sheet.getRange(rowIndex + 1, address1Idx + 1).setValue(student.address);
+        if (icIdx > -1) sheet.getRange(rowIndex + 1, icIdx + 1).setValue(student.icNumber);
+        if (p1NameIdx > -1) sheet.getRange(rowIndex + 1, p1NameIdx + 1).setValue(student.parentName);
+        updated++;
+      } else {
+        // Jika rekod tiada, cipta baris baru
+        const newRow = new Array(sheetHeaders.length).fill("");
+        newRow[idIdx] = student.id;
+        
+        const nameIdx = sheetHeaders.findIndex(h => h === "NAMA" || h === "NAMA MURID");
+        const classIdx = sheetHeaders.findIndex(h => h === "NAMA KELAS" || h === "KELAS");
+        const p1PhoneIdx = sheetHeaders.findIndex(h => h === "NO. TEL. BIMBIT PENJAGA 1" || h === "NO TEL BAPA / PENJAGA 1" || h === "NO TEL WARIS");
+        const address1Idx = sheetHeaders.findIndex(h => h === "ALAMAT 1" || h === "ALAMAT KEDIAMAN" || h === "ALAMAT");
+        const icIdx = sheetHeaders.findIndex(h => h === "NO. PENGENALAN" || h === "NO KAD PENGENALAN");
+        const p1NameIdx = sheetHeaders.findIndex(h => h === "PENJAGA 1" || h === "NAMA BAPA / PENJAGA 1" || h === "NAMA WARIS");
+        
+        if (nameIdx > -1) newRow[nameIdx] = student.name;
+        if (classIdx > -1) newRow[classIdx] = student.className;
+        if (p1PhoneIdx > -1) newRow[p1PhoneIdx] = student.parentPhone;
+        if (address1Idx > -1) newRow[address1Idx] = student.address;
+        if (icIdx > -1) newRow[icIdx] = student.icNumber;
+        if (p1NameIdx > -1) newRow[p1NameIdx] = student.parentName;
+        
+        sheet.appendRow(newRow);
+        updated++;
+      }
+    }
+
+    return responseJSON({ success: true, message: `${updated} rekod berjaya dihantar ke Google Sheets.` });
+  } catch (err) {
+    return responseJSON({ success: false, message: err.toString() });
+  }
+}
+
 function responseJSON(data) {
-  return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
+  return ContentService.createTextOutput(JSON.stringify(data))
+    .setMimeType(ContentService.MimeType.JSON);
 }
