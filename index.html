@@ -847,6 +847,13 @@
 
                             <div class="px-4 pb-3 space-y-2 text-xs border-t border-slate-100 pt-3">
                                 <div class="flex items-start gap-1.5 text-slate-700">
+                                    <i class="fa-solid fa-chalkboard-user text-indigo-600 shrink-0 mt-0.5"></i>
+                                    <div class="truncate">
+                                        <span class="font-bold">Guru Kelas:</span> ${users.find(u => u.role === 'admin_kelas' && u.assignedClass === s.className)?.name || 'Belum Ditetapkan'}
+                                    </div>
+                                </div>
+
+                                <div class="flex items-start gap-1.5 text-slate-700">
                                     <i class="fa-solid fa-user-shield text-indigo-600 shrink-0 mt-0.5"></i>
                                     <div class="truncate">
                                         <span class="font-bold">Waris:</span> ${s.parentName || '-'}
@@ -934,7 +941,7 @@
         }
 
         function viewStudentProfile(id) {
-            const s = students.find(x => x.id === id);
+            const s = students.find(x => String(x.id) === String(id));
             if (!s) return;
 
             document.getElementById('modalStudentName').innerText = s.name;
@@ -970,7 +977,7 @@
         }
 
         function editStudent(id) {
-            const s = students.find(x => x.id === id);
+            const s = students.find(x => String(x.id) === String(id));
             if (!s || !canEdit(s.className)) return;
 
             document.getElementById('editModalTitle').innerText = "Sunting Maklumat Pelajar";
@@ -994,7 +1001,7 @@
             const parentPhone = document.getElementById('editParentPhone').value.trim();
             const address = document.getElementById('editStudentAddress').value.trim();
 
-            const existingIdx = students.findIndex(x => x.id === id);
+            const existingIdx = students.findIndex(x => String(x.id) === String(id));
             const studentObj = {
                 id, name, className, icNumber, parentName, parentPhone, address,
                 gender: existingIdx >= 0 ? students[existingIdx].gender : "Lelaki",
@@ -1032,11 +1039,11 @@
         }
 
         function deleteStudent(id) {
-            const s = students.find(x => x.id === id);
+            const s = students.find(x => String(x.id) === String(id));
             if (!s || !canEdit(s.className)) return;
 
             showConfirmDialog(`Adakah anda pasti untuk memadam rekod pelajar: ${s.name}?`, () => {
-                students = students.filter(x => x.id !== id);
+                students = students.filter(x => String(x.id) !== String(id));
                 localStorage.setItem("sys_students", JSON.stringify(students));
                 populateClassFilter();
                 renderStudents();
@@ -1149,7 +1156,7 @@
         }
 
         function editUser(id) {
-            const u = users.find(x => x.id === id);
+            const u = users.find(x => String(x.id) === String(id));
             if (!u) return;
 
             document.getElementById('userModalTitle').innerText = "Sunting Akaun Guru";
@@ -1182,7 +1189,7 @@
             const role = document.getElementById('editUserRole').value;
             const assignedClass = role === 'admin_kelas' ? document.getElementById('editUserAssignedClass').value.trim() : (role === 'superadmin' ? 'Semua' : '-');
 
-            const idx = users.findIndex(x => x.id === id);
+            const idx = users.findIndex(x => String(x.id) === String(id));
             const userObj = { id, name, username, password, role, assignedClass };
 
             if (idx >= 0) {
