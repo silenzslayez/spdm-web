@@ -198,7 +198,10 @@
                         <label class="font-bold text-slate-700 block mb-1.5 ml-1">Kata Laluan (Password)</label>
                         <div class="relative group">
                             <i class="fa-solid fa-key text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 transition group-focus-within:text-indigo-500"></i>
-                            <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full pl-10 pr-3 py-3 glass-input rounded-xl font-semibold outline-none text-sm">
+                            <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full pl-10 pr-10 py-3 glass-input rounded-xl font-semibold outline-none text-sm">
+                            <button type="button" onclick="togglePasswordVisibility('loginPassword', 'eyeIconLogin')" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600 transition">
+                                <i id="eyeIconLogin" class="fa-solid fa-eye"></i>
+                            </button>
                         </div>
                     </div>
 
@@ -664,6 +667,22 @@
                 return currentUser.assignedClass === studentClass || currentUser.assignedClass === 'Semua';
             }
             return false;
+        }
+
+        function togglePasswordVisibility(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (input && icon) {
+                if (input.type === "password") {
+                    input.type = "text";
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    input.type = "password";
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            }
         }
 
         function handleLogin(e) {
