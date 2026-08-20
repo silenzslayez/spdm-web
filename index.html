@@ -1283,6 +1283,7 @@
             }
 
             localStorage.setItem("sys_users", JSON.stringify(users));
+            syncUsersToGoogleSheet();
             closeModal('userAccountModal');
             renderUsers();
             showToast("Akaun pengguna berjaya disimpan!");
@@ -1295,6 +1296,7 @@
             showConfirmDialog(`Reset kata laluan guru ${u.name} ke default (${systemSettings.defaultTeacherPass})?`, () => {
                 u.password = systemSettings.defaultTeacherPass;
                 localStorage.setItem("sys_users", JSON.stringify(users));
+                syncUsersToGoogleSheet();
                 renderUsers();
                 showToast("Kata laluan direset ke default!");
             });
@@ -1307,6 +1309,7 @@
                 showConfirmDialog(`Padam akaun guru: ${u.name}?`, () => {
                     users = users.filter(x => x.id !== userId);
                     localStorage.setItem("sys_users", JSON.stringify(users));
+                    syncUsersToGoogleSheet();
                     renderUsers();
                     showToast("Akaun guru dipadam.");
                 });
@@ -1328,6 +1331,7 @@
             if (idx >= 0) users[idx].password = newPass;
 
             localStorage.setItem("sys_users", JSON.stringify(users));
+            syncUsersToGoogleSheet();
             closeModal('changePassModal');
             showToast("Kata laluan anda berjaya ditukar!");
         }
@@ -1367,6 +1371,34 @@
             } catch (err) {
                 console.error("Ralat penarikan API Google Sheet:", err);
                 showToast("Ralat menarik data dari API Google Sheet.", "error");
+            }
+        }
+
+        async function fetchUsersFromGoogleSheet() {
+            if (!googleAppsScriptUrl) return;
+            try {
+                const response = await fetch(googleAppsScriptUrl + "?action=getUsers");
+                const apiData = await response.json();
+                if (apiData && Array.isArray(apiData) && apiData.length > 0) {
+                    users = apiData;
+                    localStorage.setItem("sys_users", JSON.stringify(users));
+                    if (currentUser) renderUsers();
+                }
+            } catch (err) {
+                console.error("Ralat penarikan users API:", err);
+            }
+        }
+
+        async function syncUsersToGoogleSheet() {
+            if (!googleAppsScriptUrl) return;
+            try {
+                await fetch(googleAppsScriptUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify({ action: 'pushUsers', users: users })
+                });
+            } catch (err) {
+                console.error("Ralat push users:", err);
             }
         }
 
@@ -1571,6 +1603,7 @@
         window.onload = function() {
             loadSystemSettingsToUI();
             populateClassFilter();
+            fetchUsersFromGoogleSheet();
         };
     </script>
 </body>

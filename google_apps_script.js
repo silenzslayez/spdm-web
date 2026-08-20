@@ -28,6 +28,11 @@ function handleRequest(e) {
         return handlePushData(payload);
       }
       
+      // Handle User Sync
+      if (payload.action === 'pushUsers') {
+        return handlePushUsers(payload);
+      }
+      
     } catch (err) {
       return responseJSON({ success: false, message: err.toString() });
     }
@@ -35,7 +40,13 @@ function handleRequest(e) {
 
   // GET Request: Fetch all data
   try {
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    const action = e.parameter.action;
+    
+    if (action === 'getUsers') {
+      return handleGetUsers();
+    }
+
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
     const data = sheet.getDataRange().getValues();
     if (data.length < 2) return responseJSON([]);
     
@@ -160,7 +171,7 @@ function handleUploadPhoto(payload) {
 
 function handlePushData(payload) {
   try {
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
     const data = sheet.getDataRange().getValues();
     const sheetHeaders = data[0].map(h => String(h).toUpperCase().trim());
     const idIdx = sheetHeaders.findIndex(h => h === "ID MURID" || h === "ID");
@@ -209,6 +220,61 @@ function handlePushData(payload) {
     }
 
     return responseJSON({ success: true, message: `${updated} rekod berjaya dihantar ke Google Sheets.` });
+  } catch (err) {
+    return responseJSON({ success: false, message: err.toString() });
+  }
+}
+
+function getOrCreateUsersSheet() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName("USERS");
+  if (!sheet) {
+    sheet = ss.insertSheet("USERS");
+    sheet.appendRow(["ID", "NAME", "USERNAME", "PASSWORD", "ROLE", "ASSIGNEDCLASS"]);
+  }
+  return sheet;
+}
+
+function handleGetUsers() {
+  try {
+    const sheet = getOrCreateUsersSheet();
+    const data = sheet.getDataRange().getValues();
+    if (data.length < 2) return responseJSON([]);
+    
+    const users = [];
+    for (let i = 1; i < data.length; i++) {
+      users.push({
+        id: String(data[i][0] || ""),
+        name: String(data[i][1] || ""),
+        username: String(data[i][2] || ""),
+        password: String(data[i][3] || ""),
+        role: String(data[i][4] || ""),
+        assignedClass: String(data[i][5] || "")
+      });
+    }
+    return responseJSON(users);
+  } catch (err) {
+    return responseJSON({ success: false, message: err.toString() });
+  }
+}
+
+function handlePushUsers(payload) {
+  try {
+    const sheet = getOrCreateUsersSheet();
+    const users = payload.users || [];
+    
+    if (sheet.getLastRow() > 1) {
+      sheet.getRange(2, 1, sheet.getLastRow() - 1, 6).clearContent();
+    }
+    
+    if (users.length > 0) {
+      const rows = users.map(u => [
+        u.id, u.name, u.username, u.password, u.role, u.assignedClass
+      ]);
+      sheet.getRange(2, 1, rows.length, 6).setValues(rows);
+    }
+    
+    return responseJSON({ success: true, message: "Senarai pengguna berjaya diselaraskan." });
   } catch (err) {
     return responseJSON({ success: false, message: err.toString() });
   }
