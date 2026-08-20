@@ -152,6 +152,10 @@
                     <i class="fa-solid fa-address-book"></i> Semakan Pelajar
                 </button>
 
+                <button id="tab-class-management" onclick="switchTab('class-management')" class="hidden flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap text-slate-600 hover:bg-slate-100">
+                    <i class="fa-solid fa-users-rectangle"></i> Pengurusan Data Kelas
+                </button>
+
                 <button id="tab-photos" onclick="switchTab('photos')" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap text-slate-600 hover:bg-slate-100">
                     <i class="fa-solid fa-camera"></i> Muat Naik Gambar
                 </button>
@@ -247,6 +251,25 @@
             <div id="statsContainer" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 hidden"></div>
 
             <div id="studentsContainer"></div>
+        </section>
+
+        <section id="content-class-management" class="tab-content hidden space-y-4">
+            <div class="glass-card p-6 rounded-3xl space-y-4">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-users-rectangle text-indigo-600"></i> Pengurusan Data Kelas
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-0.5" id="classManagementSubtitle">
+                            Senarai data pelajar di bawah seliaan anda.
+                        </p>
+                    </div>
+                    <button onclick="openAddStudentModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+                        <i class="fa-solid fa-plus"></i> Tambah Pelajar
+                    </button>
+                </div>
+                <div id="classDataContainer" class="mt-4"></div>
+            </div>
         </section>
 
         <section id="content-photos" class="tab-content hidden space-y-4">
@@ -757,6 +780,8 @@
             document.getElementById('tab-users').style.display = isSuperadmin ? 'inline-flex' : 'none';
             document.getElementById('tab-setup').style.display = isSuperadmin ? 'inline-flex' : 'none';
             document.getElementById('tab-photos').style.display = (isSuperadmin || isGuruKelas) ? 'inline-flex' : 'none';
+            const tabClassMgmt = document.getElementById('tab-class-management');
+            if (tabClassMgmt) tabClassMgmt.style.display = isGuruKelas ? 'inline-flex' : 'none';
 
             const addBtn = document.getElementById('addStudentBtn');
             if (addBtn) addBtn.style.display = (isSuperadmin || isGuruKelas) ? 'inline-flex' : 'none';
@@ -792,6 +817,7 @@
 
             if (tabId === 'photos') renderPhotoGrid();
             if (tabId === 'users') renderUsers();
+            if (tabId === 'class-management') renderClassDataManagement();
         }
 
         function populateClassFilter() {
@@ -1004,6 +1030,64 @@
                     </div>
                 `;
             }
+            renderClassDataManagement();
+        }
+
+        function renderClassDataManagement() {
+            if (!currentUser || currentUser.role !== 'admin_kelas') return;
+            const container = document.getElementById('classDataContainer');
+            if (!container) return;
+            
+            const myClass = currentUser.assignedClass;
+            const myStudents = students.filter(s => s.className === myClass);
+            
+            if (myStudents.length === 0) {
+                container.innerHTML = `<p class="text-center text-slate-500 py-10 font-medium text-xs">Tiada rekod pelajar untuk kelas ${myClass}.</p>`;
+                return;
+            }
+            
+            container.innerHTML = `
+                <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
+                    <table class="w-full text-left border-collapse text-[10px]">
+                        <thead>
+                            <tr class="bg-indigo-50 text-indigo-900 border-b border-indigo-100">
+                                <th class="p-3 font-bold text-center w-10">Bil</th>
+                                <th class="p-3 font-bold">Nama Murid</th>
+                                <th class="p-3 font-bold">No K/P</th>
+                                <th class="p-3 font-bold">Jantina</th>
+                                <th class="p-3 font-bold">Nama Waris</th>
+                                <th class="p-3 font-bold text-center">Tindakan</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            ${myStudents.map((s, index) => `
+                                <tr class="hover:bg-slate-50 bg-white transition">
+                                    <td class="p-3 text-slate-500 font-medium text-center">${index + 1}</td>
+                                    <td class="p-3 font-bold text-slate-800">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-6 h-6 rounded-full bg-slate-200 overflow-hidden shrink-0 flex items-center justify-center">
+                                                ${s.photoUrl ? `<img src="${s.photoUrl}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-user text-slate-400 text-[10px]"></i>`}
+                                            </div>
+                                            <span>${s.name}</span>
+                                        </div>
+                                    </td>
+                                    <td class="p-3 font-mono text-slate-600">${s.icNumber || '-'}</td>
+                                    <td class="p-3 text-slate-600">${s.gender || '-'}</td>
+                                    <td class="p-3 text-slate-600">${s.parentName || '-'}</td>
+                                    <td class="p-3 text-center whitespace-nowrap">
+                                        <button onclick="editStudent('${s.id}')" class="px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg font-bold transition mr-1">
+                                            <i class="fa-solid fa-pen"></i> Edit
+                                        </button>
+                                        <button onclick="deleteStudent('${s.id}')" class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg font-bold transition">
+                                            <i class="fa-solid fa-trash"></i> Padam
+                                        </button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
         }
 
         function setViewMode(mode) {
