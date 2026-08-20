@@ -459,9 +459,10 @@
                 </div>
 
                 <div class="space-y-3 text-xs">
-                    <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 grid grid-cols-2 gap-2">
+                    <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 grid grid-cols-3 gap-2">
                         <div><span class="text-slate-400 block text-[10px]">JANTINA</span><span id="modalStudentGender" class="font-bold text-slate-800"></span></div>
                         <div><span class="text-slate-400 block text-[10px]">STATUS ASRAMA</span><span id="modalStudentHostel" class="font-bold text-slate-800"></span></div>
+                        <div><span class="text-slate-400 block text-[10px]">AGAMA</span><span id="modalStudentReligion" class="font-bold text-slate-800"></span></div>
                     </div>
 
                     <div class="bg-indigo-50/60 p-4 rounded-2xl border border-indigo-100 space-y-2">
@@ -648,7 +649,7 @@
         };
 
         const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/18bkoRc2bBIhJlkO4uJayrCLD_sOmoGzM83-aLupLnWM/export?format=csv&gid=185899133";
-        let googleAppsScriptUrl = localStorage.getItem("gas_app_url") || "https://script.google.com/macros/s/AKfycbwY8UfPxxE_48x-21QE5CyMxZb_N9BtsuWrkyVNj-9nmSuQ-z0Swq8bl4pFuQ1gHG5e/exec";
+        let googleAppsScriptUrl = localStorage.getItem("gas_app_url") || "https://script.google.com/macros/s/AKfycbwHPHx3kbAf_TLHwpWuVp8IAfyeflaO6oBijHmEuPHJRNdekb7XNl0SxxRrPQoGJIFx/exec";
 
         let users = JSON.parse(localStorage.getItem("sys_users")) || [
             { id: "usr-1", username: "superadmin", password: "ADMIN123321", name: "Pentadbir Utama (Superadmin)", role: "superadmin", assignedClass: "Semua" },
@@ -857,6 +858,21 @@
                             </div>
 
                             <div class="px-4 pb-3 space-y-2 text-xs border-t border-slate-100 pt-3">
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div class="flex items-start gap-1.5 text-slate-700">
+                                        <i class="fa-solid fa-bed text-indigo-600 shrink-0 mt-0.5"></i>
+                                        <div class="truncate">
+                                            <span class="font-bold">Asrama:</span> ${s.hostelStatus || 'TIDAK'}
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start gap-1.5 text-slate-700">
+                                        <i class="fa-solid fa-hands-praying text-indigo-600 shrink-0 mt-0.5"></i>
+                                        <div class="truncate">
+                                            <span class="font-bold">Agama:</span> ${s.religion || '-'}
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="flex items-start gap-1.5 text-slate-700">
                                     <i class="fa-solid fa-chalkboard-user text-indigo-600 shrink-0 mt-0.5"></i>
                                     <div class="truncate">
@@ -965,6 +981,7 @@
                 document.getElementById('modalTeacherName').innerText = s.teacherName || 'Belum Ditetapkan';
                 document.getElementById('modalStudentGender').innerText = s.gender || '-';
                 document.getElementById('modalStudentHostel').innerText = s.hostelStatus || '-';
+                document.getElementById('modalStudentReligion').innerText = s.religion || '-';
                 document.getElementById('modalParentName').innerText = s.parentName || '-';
                 document.getElementById('modalParentRel').innerText = s.parentRelation || 'Waris';
                 document.getElementById('modalParentPhone').innerText = s.parentPhone || '-';
@@ -1026,7 +1043,8 @@
                 id, name, className, icNumber, parentName, parentPhone, address,
                 gender: existingIdx >= 0 ? students[existingIdx].gender : "Lelaki",
                 photoUrl: existingIdx >= 0 ? students[existingIdx].photoUrl : "",
-                hostelStatus: existingIdx >= 0 ? students[existingIdx].hostelStatus : "TIDAK"
+                hostelStatus: existingIdx >= 0 ? students[existingIdx].hostelStatus : "TIDAK",
+                religion: existingIdx >= 0 ? students[existingIdx].religion : "Tiada Maklumat"
             };
 
             if (existingIdx >= 0) {
@@ -1417,7 +1435,8 @@
                         parentRelation: 'Bapa',
                         address: row['ALAMAT KEDIAMAN'] || row['ALAMAT'] || '',
                         photoUrl: row['GAMBAR'] || '',
-                        hostelStatus: row['STATUS ASRAMA'] || 'TIDAK',
+                        hostelStatus: row['STATUS ASRAMA'] || row['ASRAMA'] || 'TIDAK',
+                        religion: row['AGAMA'] || row['Agama'] || 'Tiada Maklumat',
                         teacherName: row['NAMA GURU KELAS'] || row['GURU KELAS'] || ''
                     }));
 
@@ -1438,6 +1457,8 @@
                 "NAMA MURID": s.name,
                 "KELAS": s.className,
                 "JANTINA": s.gender,
+                "AGAMA": s.religion || '-',
+                "STATUS ASRAMA": s.hostelStatus || 'TIDAK',
                 "NO KAD PENGENALAN": s.icNumber,
                 "NAMA BAPA / PENJAGA 1": s.parentName,
                 "NO TEL BAPA / PENJAGA 1": s.parentPhone,

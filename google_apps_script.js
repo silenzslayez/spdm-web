@@ -55,7 +55,8 @@ function handleRequest(e) {
     const address1Idx = sheetHeaders.findIndex(h => h === "ALAMAT 1" || h === "ALAMAT KEDIAMAN" || h === "ALAMAT");
     const address2Idx = sheetHeaders.findIndex(h => h === "ALAMAT 2");
     const address3Idx = sheetHeaders.findIndex(h => h === "ALAMAT 3");
-    let hostelIdx = sheetHeaders.findIndex(h => h === "STATUS ASRAMA");
+    let hostelIdx = sheetHeaders.findIndex(h => h === "STATUS ASRAMA" || h === "ASRAMA");
+    let religionIdx = sheetHeaders.findIndex(h => h === "AGAMA" || h === "AGAMA MURID");
     let teacherIdx = sheetHeaders.findIndex(h => h === "NAMA GURU KELAS" || h === "GURU KELAS");
     let photoIdx = sheetHeaders.findIndex(h => h === "GAMBAR");
     
@@ -91,6 +92,7 @@ function handleRequest(e) {
         address: address,
         photoUrl: photoIdx > -1 ? String(row[photoIdx]) : "",
         hostelStatus: hostelIdx > -1 ? String(row[hostelIdx]) : "TIDAK",
+        religion: religionIdx > -1 ? String(row[religionIdx]) : "Tiada Maklumat",
         teacherName: teacherIdx > -1 ? String(row[teacherIdx]) : ""
       });
     }
