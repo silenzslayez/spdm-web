@@ -244,6 +244,8 @@
                 </div>
             </div>
 
+            <div id="statsContainer" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 hidden"></div>
+
             <div id="studentsContainer"></div>
         </section>
 
@@ -812,6 +814,48 @@
             if (userAssignFilter) userAssignFilter.innerHTML = userOptionsHtml;
         }
 
+        function renderStats(filteredList, selectedClass) {
+            const statsContainer = document.getElementById('statsContainer');
+            if (filteredList.length === 0) {
+                statsContainer.classList.add('hidden');
+                return;
+            }
+            
+            statsContainer.classList.remove('hidden');
+            
+            const total = filteredList.length;
+            const male = filteredList.filter(s => (s.gender || '').toUpperCase() === 'LELAKI').length;
+            const female = filteredList.filter(s => (s.gender || '').toUpperCase() === 'PEREMPUAN').length;
+            
+            const muslim = filteredList.filter(s => (s.religion || '').toUpperCase() === 'ISLAM').length;
+            const nonMuslim = total - muslim;
+            
+            const title = selectedClass === 'Semua' ? 'Keseluruhan' : `Kelas ${selectedClass}`;
+
+            statsContainer.innerHTML = `
+                <div class="glass-card p-3 rounded-2xl flex flex-col justify-center items-center text-center shadow-sm border border-indigo-100">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">${title}</span>
+                    <span class="text-xl font-black text-indigo-700 mt-1">${total} <span class="text-xs text-slate-500 font-medium">Murid</span></span>
+                </div>
+                <div class="glass-card p-3 rounded-2xl flex flex-col justify-center items-center text-center shadow-sm border border-sky-100">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Lelaki</span>
+                    <span class="text-xl font-black text-sky-600 mt-1">${male}</span>
+                </div>
+                <div class="glass-card p-3 rounded-2xl flex flex-col justify-center items-center text-center shadow-sm border border-pink-100">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Perempuan</span>
+                    <span class="text-xl font-black text-pink-600 mt-1">${female}</span>
+                </div>
+                <div class="glass-card p-3 rounded-2xl flex flex-col justify-center items-center text-center shadow-sm border border-emerald-100">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Islam / B. Islam</span>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="text-lg font-black text-emerald-600">${muslim}</span>
+                        <span class="text-sm font-bold text-slate-300">/</span>
+                        <span class="text-lg font-black text-amber-600">${nonMuslim}</span>
+                    </div>
+                </div>
+            `;
+        }
+
         function renderStudents() {
             const container = document.getElementById('studentsContainer');
             const search = document.getElementById('searchInput').value.toLowerCase().trim();
@@ -825,6 +869,8 @@
                 const matchClass = selectedClass === 'Semua' || s.className === selectedClass;
                 return matchSearch && matchClass;
             });
+
+            renderStats(filtered, selectedClass);
 
             if (filtered.length === 0) {
                 container.innerHTML = `
