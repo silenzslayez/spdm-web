@@ -33,6 +33,11 @@ function handleRequest(e) {
         return handlePushUsers(payload);
       }
       
+      // Handle Activity Log
+      if (payload.action === 'logActivity') {
+        return handleLogActivity(payload);
+      }
+      
     } catch (err) {
       return responseJSON({ success: false, message: err.toString() });
     }
@@ -44,6 +49,10 @@ function handleRequest(e) {
     
     if (action === 'getUsers') {
       return handleGetUsers();
+    }
+    
+    if (action === 'getLogs') {
+      return handleGetLogs();
     }
 
     const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
@@ -283,4 +292,54 @@ function handlePushUsers(payload) {
 function responseJSON(data) {
   return ContentService.createTextOutput(JSON.stringify(data))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+function getOrCreateLogsSheet() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName("LOGS");
+  if (!sheet) {
+    sheet = ss.insertSheet("LOGS");
+    sheet.appendRow(["TIMESTAMP", "USERNAME", "ROLE", "ACTION", "DETAILS"]);
+  }
+  return sheet;
+}
+
+function handleLogActivity(payload) {
+  try {
+    const sheet = getOrCreateLogsSheet();
+    const ts = payload.timestamp || new Date().toISOString();
+    const username = payload.username || "System";
+    const role = payload.role || "unknown";
+    const action = payload.logAction || "UNKNOWN_ACTION";
+    const details = payload.details || "";
+    
+    sheet.appendRow([ts, username, role, action, details]);
+    
+    return responseJSON({ success: true });
+  } catch (err) {
+    return responseJSON({ success: false, message: err.toString() });
+  }
+}
+
+function handleGetLogs() {
+  try {
+    const sheet = getOrCreateLogsSheet();
+    const data = sheet.getDataRange().getValues();
+    if (data.length < 2) return responseJSON([]);
+    
+    const logs = [];
+    for (let i = data.length - 1; i >= 1; i--) {
+      logs.push({
+        timestamp: String(data[i][0] || ""),
+        username: String(data[i][1] || ""),
+        role: String(data[i][2] || ""),
+        action: String(data[i][3] || ""),
+        details: String(data[i][4] || "")
+      });
+      if (logs.length >= 500) break;
+    }
+    return responseJSON(logs);
+  } catch (err) {
+    return responseJSON({ success: false, message: err.toString() });
+  }
 }

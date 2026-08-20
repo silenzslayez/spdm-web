@@ -167,6 +167,9 @@
                 <button id="tab-users" onclick="switchTab('users')" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap text-slate-600 hover:bg-slate-100">
                     <i class="fa-solid fa-users-gear"></i> Pengurusan Pengguna & Tetapan
                 </button>
+                <button id="tab-logs" onclick="switchTab('logs')" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap text-slate-600 hover:bg-slate-100" style="display:none;">
+                    <i class="fa-solid fa-clipboard-list"></i> Log Sistem
+                </button>
 
                 <button id="tab-setup" onclick="switchTab('setup')" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap text-slate-600 hover:bg-slate-100">
                     <i class="fa-solid fa-plug"></i> Integrasi Google Sheet & Drive
@@ -470,6 +473,22 @@
             </div>
         </section>
 
+        <section id="content-logs" class="tab-content hidden space-y-4">
+            <div class="glass-card p-6 rounded-3xl space-y-4">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-clipboard-list text-indigo-600"></i> Log Sistem
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-0.5">Penjejak rekod aktiviti pengguna dalam sistem.</p>
+                    </div>
+                    <button onclick="fetchLogs()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-xl text-xs font-bold transition">
+                        <i class="fa-solid fa-rotate-right"></i> Refresh
+                    </button>
+                </div>
+                <div id="logsContainer"></div>
+            </div>
+        </section>
     </main>
 
     <!-- MODAL 1: PROFIL PELAJAR (PRINTABLE & PDPA FULL VIEW) -->
@@ -733,6 +752,7 @@
 
                 updateUserNavInfo();
                 showToast(`Selamat datang, ${currentUser.name}!`);
+                logActivity('LOG MASUK', 'Berjaya log masuk ke dalam sistem.');
             } else {
                 showToast("Username atau kata laluan tidak betul!", "error");
             }
@@ -784,6 +804,7 @@
 
             document.getElementById('tab-upload').style.display = isSuperadmin ? 'inline-flex' : 'none';
             document.getElementById('tab-users').style.display = isSuperadmin ? 'inline-flex' : 'none';
+            document.getElementById('tab-logs').style.display = isSuperadmin ? 'inline-flex' : 'none';
             document.getElementById('tab-setup').style.display = isSuperadmin ? 'inline-flex' : 'none';
             document.getElementById('tab-photos').style.display = (isSuperadmin || isGuruKelas) ? 'inline-flex' : 'none';
             const tabClassMgmt = document.getElementById('tab-class-management');
@@ -819,11 +840,12 @@
             }
 
             const activeContent = document.getElementById(`content-${tabId}`);
-            if (activeContent) activeContent.classList.remove('hidden');
-
             if (tabId === 'photos') renderPhotoGrid();
             if (tabId === 'users') renderUsers();
+            document.getElementById(`content-${tabId}`).classList.remove('hidden');
+            
             if (tabId === 'class-management') renderClassDataManagement();
+            if (tabId === 'logs') fetchLogs();
         }
 
         function populateClassFilter() {
@@ -1236,8 +1258,10 @@
 
             if (existingIdx >= 0) {
                 students[existingIdx] = studentObj;
+                logActivity('KEMASKINI PELAJAR', `Mengemaskini data pelajar: ${name} (${icNumber})`);
             } else {
                 students.push(studentObj);
+                logActivity('TAMBAH PELAJAR', `Menambah rekod baru pelajar: ${name} (${icNumber})`);
             }
 
             localStorage.setItem("sys_students", JSON.stringify(students));
@@ -1273,6 +1297,7 @@
                 populateClassFilter();
                 renderStudents();
                 showToast("Rekod pelajar berjaya dipadam!");
+                logActivity('PADAM PELAJAR', `Memadam rekod pelajar: ${s.name} (${s.icNumber || 'Tiada IC'})`);
             });
         }
 
@@ -1419,8 +1444,10 @@
 
             if (idx >= 0) {
                 users[idx] = userObj;
+                logActivity('KEMASKINI PENGGUNA', `Mengemaskini profil pengguna: ${name} (@${username})`);
             } else {
                 users.push(userObj);
+                logActivity('TAMBAH PENGGUNA', `Mencipta pengguna baharu: ${name} (@${username})`);
             }
 
             localStorage.setItem("sys_users", JSON.stringify(users));
@@ -1453,6 +1480,7 @@
                     syncUsersToGoogleSheet();
                     renderUsers();
                     showToast("Akaun guru dipadam.");
+                    logActivity('PADAM PENGGUNA', `Memadam pengguna sistem: ${u.name} (@${u.username})`);
                 });
             }
         }
@@ -1513,6 +1541,75 @@
                 console.error("Ralat penarikan API Google Sheet:", err);
                 showToast("Ralat menarik data dari API Google Sheet.", "error");
             }
+        }
+
+        let systemLogs = [];
+        
+        async function fetchLogs() {
+            if (!googleAppsScriptUrl) return;
+            document.getElementById('logsContainer').innerHTML = '<div class="text-center py-10"><i class="fa-solid fa-circle-notch fa-spin text-indigo-500 text-3xl"></i><p class="text-slate-500 mt-3 text-xs font-bold">Memuat turun log sistem...</p></div>';
+            try {
+                const response = await fetch(googleAppsScriptUrl + "?action=getLogs");
+                const apiData = await response.json();
+                systemLogs = Array.isArray(apiData) ? apiData : [];
+                renderLogs();
+            } catch (err) {
+                document.getElementById('logsContainer').innerHTML = '<div class="text-center py-10 text-rose-500 font-bold text-xs"><i class="fa-solid fa-triangle-exclamation text-3xl mb-2"></i><br>Gagal memuat turun log.</div>';
+            }
+        }
+
+        function renderLogs() {
+            const container = document.getElementById('logsContainer');
+            if (systemLogs.length === 0) {
+                container.innerHTML = '<p class="text-center text-slate-500 py-10 text-xs font-bold">Tiada rekod log aktiviti dijumpai.</p>';
+                return;
+            }
+            container.innerHTML = `
+                <div class="overflow-x-auto rounded-xl border border-slate-200">
+                    <table class="w-full text-left border-collapse text-[11px]">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                                <th class="p-3 w-40">Tarikh / Masa</th>
+                                <th class="p-3">Pengguna</th>
+                                <th class="p-3">Tindakan</th>
+                                <th class="p-3">Butiran</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            ${systemLogs.map(l => {
+                                const d = new Date(l.timestamp);
+                                const dateStr = isNaN(d) ? l.timestamp : d.toLocaleString('ms-MY', {timeZone: 'Asia/Kuala_Lumpur'});
+                                return `
+                                <tr class="hover:bg-slate-50 transition">
+                                    <td class="p-3 text-slate-500 whitespace-nowrap">${dateStr}</td>
+                                    <td class="p-3 font-bold text-indigo-700">@${l.username} <span class="text-[9px] text-slate-400 bg-slate-100 px-1 rounded ml-1">${l.role}</span></td>
+                                    <td class="p-3 font-bold text-slate-700">${l.action}</td>
+                                    <td class="p-3 text-slate-600">${l.details}</td>
+                                </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        async function logActivity(action, details) {
+            if (!googleAppsScriptUrl || !currentUser) return;
+            try {
+                await fetch(googleAppsScriptUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify({
+                        action: 'logActivity',
+                        timestamp: new Date().toISOString(),
+                        username: currentUser.username,
+                        role: currentUser.role,
+                        logAction: action,
+                        details: details
+                    })
+                });
+            } catch (err) {}
         }
 
         async function fetchUsersFromGoogleSheet() {
