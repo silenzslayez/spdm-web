@@ -1052,10 +1052,10 @@
                         <thead>
                             <tr class="bg-indigo-50 text-indigo-900 border-b border-indigo-100">
                                 <th class="p-3 font-bold text-center w-10">Bil</th>
-                                <th class="p-3 font-bold">Nama Murid</th>
-                                <th class="p-3 font-bold">No K/P</th>
-                                <th class="p-3 font-bold">Jantina</th>
-                                <th class="p-3 font-bold">Nama Waris</th>
+                                <th class="p-3 font-bold min-w-[150px]">Nama Murid</th>
+                                <th class="p-3 font-bold">No K/P & Jantina</th>
+                                <th class="p-3 font-bold">Waris & Telefon</th>
+                                <th class="p-3 font-bold min-w-[150px]">Alamat</th>
                                 <th class="p-3 font-bold text-center">Tindakan</th>
                             </tr>
                         </thead>
@@ -1071,9 +1071,17 @@
                                             <span>${s.name}</span>
                                         </div>
                                     </td>
-                                    <td class="p-3 font-mono text-slate-600">${s.icNumber || '-'}</td>
-                                    <td class="p-3 text-slate-600">${s.gender || '-'}</td>
-                                    <td class="p-3 text-slate-600">${s.parentName || '-'}</td>
+                                    <td class="p-3 font-mono text-slate-600">
+                                        <div>${s.icNumber || '-'}</div>
+                                        <div class="text-[9px] text-slate-400 font-sans font-bold mt-0.5">${s.gender || '-'}</div>
+                                    </td>
+                                    <td class="p-3">
+                                        <div class="font-bold text-slate-700">${s.parentName || '-'}</div>
+                                        <div class="font-mono text-emerald-700 font-bold mt-0.5">${s.parentPhone || '-'}</div>
+                                    </td>
+                                    <td class="p-3 text-slate-500 max-w-[200px] truncate" title="${s.address || ''}">
+                                        ${s.address || '-'}
+                                    </td>
                                     <td class="p-3 text-center whitespace-nowrap">
                                         <button onclick="editStudent('${s.id}')" class="px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg font-bold transition mr-1">
                                             <i class="fa-solid fa-pen"></i> Edit
