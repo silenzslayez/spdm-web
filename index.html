@@ -255,7 +255,7 @@
 
         <section id="content-class-management" class="tab-content hidden space-y-4">
             <div class="glass-card p-6 rounded-3xl space-y-4">
-                <div class="flex justify-between items-center">
+                <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
                     <div>
                         <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
                             <i class="fa-solid fa-users-rectangle text-indigo-600"></i> Pengurusan Data Kelas
@@ -264,9 +264,15 @@
                             Senarai data pelajar di bawah seliaan anda.
                         </p>
                     </div>
-                    <button onclick="openAddStudentModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
-                        <i class="fa-solid fa-plus"></i> Tambah Pelajar
-                    </button>
+                    <div class="flex items-center gap-2 w-full md:w-auto">
+                        <select id="classMgmtSortMode" onchange="renderClassDataManagement()" class="bg-slate-50 border border-slate-200 text-xs rounded-xl px-3 py-2 font-semibold text-slate-700 focus:ring-2 focus:ring-indigo-500 outline-none w-full md:w-auto">
+                            <option value="missing_phone">Auto: Tiada No Tel Di Atas</option>
+                            <option value="alphabetical">Susunan Abjad (A-Z)</option>
+                        </select>
+                        <button onclick="openAddStudentModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shrink-0">
+                            <i class="fa-solid fa-plus"></i> Tambah Pelajar
+                        </button>
+                    </div>
                 </div>
                 <div id="classDataContainer" class="mt-4"></div>
             </div>
@@ -1039,61 +1045,64 @@
             if (!container) return;
             
             const myClass = currentUser.assignedClass;
-            const myStudents = students.filter(s => s.className === myClass);
+            let myStudents = students.filter(s => s.className === myClass);
             
             if (myStudents.length === 0) {
                 container.innerHTML = `<p class="text-center text-slate-500 py-10 font-medium text-xs">Tiada rekod pelajar untuk kelas ${myClass}.</p>`;
                 return;
             }
+
+            const sortMode = document.getElementById('classMgmtSortMode')?.value || 'missing_phone';
+            myStudents.sort((a, b) => {
+                if (sortMode === 'missing_phone') {
+                    const aHasPhone = (a.parentPhone && String(a.parentPhone).trim() !== '') ? 1 : 0;
+                    const bHasPhone = (b.parentPhone && String(b.parentPhone).trim() !== '') ? 1 : 0;
+                    if (aHasPhone !== bHasPhone) return aHasPhone - bHasPhone;
+                }
+                return String(a.name || '').localeCompare(String(b.name || ''));
+            });
             
             container.innerHTML = `
-                <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
-                    <table class="w-full text-left border-collapse text-[10px]">
-                        <thead>
-                            <tr class="bg-indigo-50 text-indigo-900 border-b border-indigo-100">
-                                <th class="p-3 font-bold text-center w-10">Bil</th>
-                                <th class="p-3 font-bold min-w-[150px]">Nama Murid</th>
-                                <th class="p-3 font-bold">No K/P & Jantina</th>
-                                <th class="p-3 font-bold">Waris & Telefon</th>
-                                <th class="p-3 font-bold min-w-[150px]">Alamat</th>
-                                <th class="p-3 font-bold text-center">Tindakan</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100">
-                            ${myStudents.map((s, index) => `
-                                <tr class="hover:bg-slate-50 bg-white transition">
-                                    <td class="p-3 text-slate-500 font-medium text-center">${index + 1}</td>
-                                    <td class="p-3 font-bold text-slate-800">
-                                        <div class="flex items-center gap-2">
-                                            <div class="w-6 h-6 rounded-full bg-slate-200 overflow-hidden shrink-0 flex items-center justify-center">
-                                                ${s.photoUrl ? `<img src="${s.photoUrl}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-user text-slate-400 text-[10px]"></i>`}
-                                            </div>
-                                            <span>${s.name}</span>
-                                        </div>
-                                    </td>
-                                    <td class="p-3 font-mono text-slate-600">
-                                        <div>${s.icNumber || '-'}</div>
-                                        <div class="text-[9px] text-slate-400 font-sans font-bold mt-0.5">${s.gender || '-'}</div>
-                                    </td>
-                                    <td class="p-3">
-                                        <div class="font-bold text-slate-700">${s.parentName || '-'}</div>
-                                        <div class="font-mono text-emerald-700 font-bold mt-0.5">${s.parentPhone || '-'}</div>
-                                    </td>
-                                    <td class="p-3 text-slate-500 max-w-[200px] truncate" title="${s.address || ''}">
-                                        ${s.address || '-'}
-                                    </td>
-                                    <td class="p-3 text-center whitespace-nowrap">
-                                        <button onclick="editStudent('${s.id}')" class="px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg font-bold transition mr-1">
-                                            <i class="fa-solid fa-pen"></i> Edit
-                                        </button>
-                                        <button onclick="deleteStudent('${s.id}')" class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg font-bold transition">
-                                            <i class="fa-solid fa-trash"></i> Padam
-                                        </button>
-                                    </td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    ${myStudents.map((s, index) => `
+                        <div class="glass-card p-4 rounded-2xl flex flex-col gap-3 relative overflow-hidden border ${(!s.parentPhone || String(s.parentPhone).trim() === '') ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200'}">
+                            ${(!s.parentPhone || String(s.parentPhone).trim() === '') ? '<div class="absolute top-0 right-0 bg-rose-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-bl-lg shadow-sm">Tiada No Tel</div>' : ''}
+                            <div class="flex items-start justify-between gap-2">
+                                <div class="flex items-center gap-3 w-full">
+                                    <div class="w-12 h-12 rounded-full bg-slate-200 overflow-hidden shrink-0 flex items-center justify-center border-2 border-white shadow-sm">
+                                        ${s.photoUrl ? `<img src="${s.photoUrl}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-user text-slate-400 text-lg"></i>`}
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="font-bold text-slate-800 text-xs truncate" title="${s.name}">${index + 1}. ${s.name}</div>
+                                        <div class="text-[10px] text-slate-500 font-mono mt-0.5">${s.icNumber || 'Tiada IC'} • <span class="font-sans font-semibold">${s.gender || 'Tiada Jantina'}</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white/60 rounded-xl p-3 text-[11px] space-y-2 border border-slate-100">
+                                <div class="flex items-start gap-2">
+                                    <i class="fa-solid fa-user-shield text-indigo-400 mt-0.5 w-4 text-center shrink-0"></i>
+                                    <div class="min-w-0 flex-1">
+                                        <div class="font-bold text-slate-700 truncate" title="${s.parentName || ''}">${s.parentName || '-'}</div>
+                                        <div class="font-mono font-bold text-emerald-600 mt-0.5">${s.parentPhone || '-'}</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-2">
+                                    <i class="fa-solid fa-location-dot text-rose-400 mt-0.5 w-4 text-center shrink-0"></i>
+                                    <div class="text-slate-600 line-clamp-2 min-w-0 flex-1" title="${s.address || ''}">${s.address || '-'}</div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-end gap-2 mt-auto pt-1">
+                                <button onclick="editStudent('${s.id}')" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
+                                    <i class="fa-solid fa-pen"></i> Edit
+                                </button>
+                                <button onclick="deleteStudent('${s.id}')" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg text-xs font-bold transition">
+                                    <i class="fa-solid fa-trash"></i> Padam
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
                 </div>
             `;
         }
