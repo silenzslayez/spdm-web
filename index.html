@@ -1116,7 +1116,15 @@
                                     <i class="fa-solid fa-user-shield text-indigo-400 mt-0.5 w-4 text-center shrink-0"></i>
                                     <div class="min-w-0 flex-1">
                                         <div class="font-bold text-slate-700 truncate" title="${s.parentName || ''}">${s.parentName || '-'}</div>
-                                        <div class="font-mono font-bold text-emerald-600 mt-0.5">${s.parentPhone || '-'}</div>
+                                        <div class="flex items-center justify-between mt-0.5">
+                                            <div class="font-mono font-bold text-emerald-600">${s.parentPhone || '-'}</div>
+                                            ${s.parentPhone && s.parentPhone.trim() !== '' ? `
+                                                <div class="flex items-center gap-1">
+                                                    <a href="https://wa.me/6${s.parentPhone.replace(/[^0-9]/g, '')}" target="_blank" class="p-1.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-md text-[10px] transition" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                                                    <a href="tel:${s.parentPhone}" class="p-1.5 bg-sky-100 hover:bg-sky-200 text-sky-700 rounded-md text-[10px] transition" title="Panggil"><i class="fa-solid fa-phone"></i></a>
+                                                </div>
+                                            ` : ''}
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="flex items-start gap-2">
