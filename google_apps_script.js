@@ -14,7 +14,7 @@ function handleRequest(e) {
     "Access-Control-Allow-Headers": "Content-Type",
   };
   
-  if (e.postData && e.postData.type === "application/json") {
+  if (e.postData && e.postData.contents) {
     try {
       const payload = JSON.parse(e.postData.contents);
       
